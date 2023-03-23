@@ -56,8 +56,16 @@ async def login(user: model.UserLogin):
 
 @app.post("/get_courses")
 async def login(token: model.Token):
-
-    return ydb_educ.get_courses()
+    user_id = ydb_proc.get_user_id_from_access_token(access_token=token.access_token)
+    user_db = ydb_proc.get_db_user_by_user_id(user_id=user_id) 
+    if user_db:
+        return {
+                'status': True,
+                'message': ydb_educ.get_courses()
+        }
+    else:
+        return {'status': False,
+                'message': 'access error'}    
 
 @app.post("/choose_course")
 async def login(token: model.Token, course_id):
@@ -77,19 +85,10 @@ async def login(token: model.Token, course_id):
 @app.post("/get_exercise")
 async def login(token: model.Token, category_id):
     user_id = ydb_proc.get_user_id_from_access_token(access_token=token.access_token)
-    #user_db = ydb_proc.get_db_user_by_user_id(user_id=user_id)
+ 
     
     random_sentence = ydb_educ.get_random_sentence(category_id)
-    #sentence = model.Sentence(sentence_id=random_sentence["sentence_id"], exercise=random_sentence["exercise"])
 
-    #education_dict = json.loads(user_db.education)
-    #education_dict["current_categorie"] = category_id
-    #updated_education = json.dumps(education_dict, indent = 4)
-    #user_db.education = updated_education
-
-    #ydb_educ.update_education(user_db)
-
-    #print(random_sentence)
 
     excercise_id = uuid.uuid4().hex
     exercise_timestamp = int(datetime.datetime.now().timestamp())
